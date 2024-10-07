@@ -5,7 +5,7 @@ const subcategorySelect = document.getElementById("subcategory-select");
 const rollButton = document.getElementById("roll-button");
 
 const categories = {
-  Bestiary: {
+  Monsters: {
     "Random Monster": data["Random Monster"],
     "Custom Monster": data["Custom Monster"],
     "Reaction Roll": data["Reaction Roll"],
@@ -21,6 +21,7 @@ const categories = {
     Forest: data.Forest,
     Realm: data.Realm,
     Faction: data.Realm,
+    NPC: data.NPCGenerator,
   },
   Items: {
     Relics: data.Relics,
@@ -51,8 +52,8 @@ rollButton.addEventListener("click", () => {
   const subcategory = subcategorySelect.value;
 
   switch (category) {
-    case "Bestiary":
-      rollBestiary(categories.Bestiary, subcategory);
+    case "Monsters":
+      rollMonsters(categories.Monsters, subcategory);
       break;
     case "Events":
       rollEvents(categories.Events, subcategory);
@@ -64,7 +65,7 @@ rollButton.addEventListener("click", () => {
       rollRealm(categories.Realm, subcategory);
       break;
     case "Worldbuilding":
-      rollLocations(categories["Worldbuilding"], subcategory);
+      rollWorldbuilding(categories["Worldbuilding"], subcategory);
       break;
     case "Items":
       rollRelics(categories.Items, subcategory);
@@ -79,6 +80,14 @@ const clearResults = () => {
 
 const clearButton = document.getElementById("clear-button");
 clearButton.addEventListener("click", clearResults);
+
+const copyButton = document.getElementById("tools-copy-text-button");
+copyButton.addEventListener("click", () => {
+  const resultDisplay = document.getElementById("tools-result-display");
+  const text = resultDisplay.innerText;
+  navigator.clipboard.writeText(text);
+  alert("Results copied to clipboard");
+});
 
 const roll = (sides) => {
   return Math.floor(Math.random() * sides);
@@ -127,10 +136,10 @@ const displayResult = (result) => {
 };
 
 // Roll functions
-const rollBestiary = (data, subcategory) => {
-  const bestiary = data[subcategory];
+const rollMonsters = (data, subcategory) => {
+  const Monsters = data[subcategory];
   if (subcategory === "Random Monster") {
-    const result = bestiary[roll(bestiary.length)];
+    const result = Monsters[roll(Monsters.length)];
     const formattedTraits = result.Traits.map((trait) => trait.replace(/Critical Damage/g, "<b>Critical Damage</b>"));
     const textResult = `<b><u>${result.Name}</u></b><br><br>HP: ${result.HP}, ${
       result.Armor ? `Armor: ${result.Armor},` : ""
@@ -139,19 +148,19 @@ const rollBestiary = (data, subcategory) => {
     }• ${formattedTraits.join("<br>• ")}`;
     displayResult(textResult);
   } else if (subcategory === "Custom Monster") {
-    const physique = bestiary.MonsterAppearance.Physique[roll(bestiary.MonsterAppearance.Physique.length)];
-    const feature = bestiary.MonsterAppearance.Feature[roll(bestiary.MonsterAppearance.Feature.length)];
-    const quirks = bestiary.MonsterTraits.Quirks[roll(bestiary.MonsterTraits.Quirks.length)];
-    const weakness = bestiary.MonsterTraits.Weakness[roll(bestiary.MonsterTraits.Weakness.length)];
-    const attack = bestiary.MonsterAttacks.Type[roll(bestiary.MonsterAttacks.Type.length)];
-    const criticalDamage = bestiary.MonsterAttacks.CriticalDamage[roll(bestiary.MonsterAttacks.CriticalDamage.length)];
-    const ability = bestiary.MonsterAbilities.Ability[roll(bestiary.MonsterAbilities.Ability.length)];
-    const target = bestiary.MonsterAbilities.Target[roll(bestiary.MonsterAbilities.Target.length)];
+    const physique = Monsters.MonsterAppearance.Physique[roll(Monsters.MonsterAppearance.Physique.length)];
+    const feature = Monsters.MonsterAppearance.Feature[roll(Monsters.MonsterAppearance.Feature.length)];
+    const quirks = Monsters.MonsterTraits.Quirks[roll(Monsters.MonsterTraits.Quirks.length)];
+    const weakness = Monsters.MonsterTraits.Weakness[roll(Monsters.MonsterTraits.Weakness.length)];
+    const attack = Monsters.MonsterAttacks.Type[roll(Monsters.MonsterAttacks.Type.length)];
+    const criticalDamage = Monsters.MonsterAttacks.CriticalDamage[roll(Monsters.MonsterAttacks.CriticalDamage.length)];
+    const ability = Monsters.MonsterAbilities.Ability[roll(Monsters.MonsterAbilities.Ability.length)];
+    const target = Monsters.MonsterAbilities.Target[roll(Monsters.MonsterAbilities.Target.length)];
     const textResult = `<b><u>Custom Monster</u></b><br><br><b>Physique:</b> ${physique}<br><b>Feature:</b> ${feature}<br><b>Quirks:</b> ${quirks}<br><b>Weakness:</b> ${weakness}<br><b>Attack:</b> ${attack}<br><b>Critical Damage:</b> ${criticalDamage}<br><b>Ability:</b> ${ability}<br><b>Target:</b> ${target}`;
     displayResult(textResult);
   } else if (subcategory === "Reaction Roll") {
     let roll = utils.roll(2, 6);
-    const result = bestiary[roll - 2]; //2-12 -> 0-10
+    const result = Monsters[roll - 2]; //2-12 -> 0-10
     const textResult = `<b><u>Reaction Roll</u></b><br><br><b>${result}</b>`;
     displayResult(textResult);
   }
@@ -244,7 +253,7 @@ const rollRelics = (data, subcategory) => {
   displayResult(textResult);
 };
 
-const rollLocations = (data, subcategory) => {
+const rollWorldbuilding = (data, subcategory) => {
   const setting = data[subcategory];
   let result = {};
 
@@ -524,8 +533,17 @@ const rollLocations = (data, subcategory) => {
     displayResult(textResult);
   } else if (subcategory === "Faction") {
     result = rollRealmFaction();
-
     const textResult = `<b><u>Faction</u></b><br><br>${formatObjectToString(result)}`;
+    displayResult(textResult);
+  } else if (subcategory === "NPC") {
+    const name = setting.NPCNames.Names[roll(setting.NPCNames.Names.length)];
+    const background = setting.NPCBackgrounds[roll(setting.NPCBackgrounds.length)];
+    const virtue = setting.NPCTraits.Virtues[roll(setting.NPCTraits.Virtues.length)];
+    const vice = setting.NPCTraits.Vices[roll(setting.NPCTraits.Vices.length)];
+    const quirk = setting.NPCQuirks[roll(setting.NPCQuirks.length)];
+    const goal = setting.NPCGoals.Goals[roll(setting.NPCGoals.Goals.length)];
+
+    const textResult = `<b><u>NPC</u></b><br><br><b>Name:</b> ${name}<br><b>Background:</b> ${background}<br><b>Virtue:</b> ${virtue}<br><b>Vice:</b> ${vice}<br><b>Quirk:</b> ${quirk}<br><b>Goal:</b> ${goal}`;
     displayResult(textResult);
   }
 };
